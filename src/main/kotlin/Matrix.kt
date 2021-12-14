@@ -24,22 +24,18 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
     val isDegenerate get() = determinant == 0.0
     /** Whether the matrix contains only zeros below the main diagonal. */
     val isZeroBelowMain get(): Boolean {
-        repeat(height) { j ->
-            repeat(j) { i ->
+        for (j in 0 until height)
+            for (i in 0 until j)
                 if (this[i, j] != 0.0)
                     return false
-            }
-        }
         return true
     }
     /** Whether the matrix contains only zeros above the main diagonal. */
     val isZeroAboveMain get(): Boolean {
-        repeat(width) { i ->
-            repeat(i) { j ->
+        for (i in 0 until width)
+            for (j in 0 until i)
                 if (this[i, j] != 0.0)
                     return false
-            }
-        }
         return true
     }
 
@@ -51,7 +47,7 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
     /** A matrix that contains all of the elements of the original matrix with swapped i and j coordinates. */
     val transposed get() = Matrix(width, height) { i, j -> this[j, i] }
     /** A matrix that is made of complements of each element in the original matrix. */
-    val adjunct get() = Matrix(height, width) { i, j -> complement(i, j) }
+    val adjunct get() = Matrix(height, width) { i, j -> getComplement(i, j) }
     /** Such matrix with which the equality `original * this = identity` is true. */
     val reversed get() = if (isSquare && !isDegenerate) adjunct.transposed / determinant else null
 
@@ -66,7 +62,7 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
                 this[2, 0] * this[1, 1] * this[0, 2] -
                 this[2, 1] * this[1, 2] * this[0, 0] -
                 this[1, 0] * this[0, 1] * this[2, 2]
-        else -> (0 until width).sumOf { this[it, 0] * complement(it, 0) }
+        else -> (0 until width).sumOf { this[it, 0] * getComplement(it, 0) }
     }
     /** why would we need this shit */
     val trace get() = if (isSquare) (0 until width).sumOf { this[it, it] } else Double.NaN
@@ -83,20 +79,18 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
 
     operator fun get(i: Int, j: Int) = content[i][j]
     operator fun get(w: IntRange, h: IntRange) =
-        Matrix(h.count(), w.count()) { i, j -> this[i + h.first, j + w.first] }
+        Matrix(h.last - h.first, w.last - w.first) { i, j -> this[i + h.first, j + w.first] }
 
     operator fun plus(other: Matrix) = Matrix(
         max(height, other.height),
         max(width, other.width)
-    ) { i, j ->
-        getOrZero(i, j) + other.getOrZero(i, j)
-    }
+    ) { i, j -> getOrZero(i, j) + other.getOrZero(i, j) }
+
     operator fun minus(other: Matrix) = Matrix(
         max(height, other.height),
         max(width, other.width)
-    ) { i, j ->
-        getOrZero(i, j) - other.getOrZero(i, j)
-    }
+    ) { i, j -> getOrZero(i, j) - other.getOrZero(i, j) }
+
     operator fun times(other: Matrix) = if (width == other.height)
         Matrix(height, other.width) { i, j ->
             (0 until width).sumOf { this[i, it] * other[it, j] }
@@ -109,9 +103,9 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
     operator fun unaryMinus() = map(Double::unaryMinus)
 
     /** @return The element at [i], [j], if exists, else zero. */
-    fun getOrZero(i: Int, j: Int) = if (i < width && j < height) this[i, j] else 0.0
+    fun getOrZero(i: Int, j: Int) = if (i in 0 until width && j in 0 until height) this[i, j] else 0.0
     /** @return The element at [i], [j], if exists, else null. */
-    fun getOrNull(i: Int, j: Int) = if (i < width && j < height) this[i, j] else null
+    fun getOrNull(i: Int, j: Int) = if (i in 0 until width && j in 0 until height) this[i, j] else null
 
     /** @return A `List` of numbers in the [i]-th row. */
     fun getRow(i: Int) = content[i]
@@ -119,24 +113,29 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
     fun getColumn(j: Int) = List(height) { this[it, j] }
 
     /** @return A copy of the matrix where the [i]-th row and [j]-th column are not present. */
-    fun submatrix(i: Int, j: Int) = Matrix(height - 1, width - 1) { _i, _j ->
+    fun getSubmatrix(i: Int, j: Int) = Matrix(height - 1, width - 1) { _i, _j ->
         this[if (_i >= i) _i + 1 else _i, if (_j >= j) _j + 1 else _j]
     }
     /** @return The minor of the matrix at [i], [j], or the determinant of the submatrix of the matrix at [i], [j]. */
-    fun minor(i: Int, j: Int) = submatrix(i, j).determinant
+    fun getMinor(i: Int, j: Int) = getSubmatrix(i, j).determinant
     /** @return The minor of the matrix at [i], [j] multiplied by -1 to the power of the sum of the indexes. */
-    fun complement(i: Int, j: Int) = (-1.0).pow(i + j) * minor(i, j)
+    fun getComplement(i: Int, j: Int) = (-1.0).pow(i + j) * getMinor(i, j)
 
     inline fun <T : Number> map(transform: (Double) -> T) =
         Matrix(mapToList { num -> transform(num).toDouble() })
+
     inline fun <T : Number> mapIndexed(transform: (i: Int, j: Int, number: Double) -> T): Matrix =
         Matrix(mapToListIndexed { i, j, num -> transform(i, j, num).toDouble() })
+
     inline fun <T> mapToList(transform: (Double) -> T) =
         toList().map { it.map(transform) }
+
     inline fun <T> mapToListIndexed(transform: (i: Int, j: Int, number: Double) -> T) =
         toList().mapIndexed { i, l -> l.mapIndexed { j, num -> transform(i, j, num) } }
+
     inline fun <T> flatMap(transform: (Double) -> T) =
         List(width * height) { transform(this[it / width, it % width]) }
+
     inline fun <T> flatMapIndexed(transform: (i: Int, j: Int, number: Double) -> T) =
         List(width * height) { transform(it / width, it % width, this[it / width, it % width]) }
 
@@ -150,27 +149,24 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
     override fun containsAll(elements: Collection<Double>) = elements.all(::contains)
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Matrix || width != other.width || height != other.height) return false
-        repeat(width) { i ->
-            repeat(height) { j ->
+        if (other !is Matrix || width != other.width || height != other.height)
+            return false
+        for (i in 0 until width)
+            for (j in 0 until height)
                 if (this[i, j] != other[i, j])
                     return false
-            }
-        }
         return true
     }
 
     override fun hashCode() = 31 * (31 * content.hashCode() + width) + height
 
     override fun toString() = if (height > 0) Array(height) { StringBuilder("⎜") }.apply {
-        repeat(width) { j ->
-            repeat(height) { i ->
-                this[i].append(' ', this@Matrix[i, j])
-            }
+        for (j in 0 until width) {
+            for (i in 0 until height)
+                this[i].append(' ', get(i, j))
             val maxLen = maxOf(StringBuilder::length)
-            repeat(height) { i ->
+            for (i in 0 until height)
                 this[i].append(" ".repeat(maxLen - this[i].length))
-            }
         }
         if (height == 1)
             this[0].append(" )")[0] = '('
@@ -180,7 +176,8 @@ class Matrix(content: List<List<Double>>) : Collection<Double> {
                 this[i].append(" ⎟")
             this[height - 1].append(" ⎠")[0] = '⎝'
         }
-    }.joinToString("\n") else "()"
+    }.joinToString("\n")
+    else "()"
 
     companion object {
         /**

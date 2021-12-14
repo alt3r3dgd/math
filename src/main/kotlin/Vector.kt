@@ -50,10 +50,6 @@ class Vector(var x: Double = 0.0, var y: Double = 0.0, var z: Double = 0.0) {
     )
     /**The angle between vectors.*/
     infix fun angleTo(other: Vector) = acos(times(other) / (length * other.length))
-    /**The cross product of vectors.*/
-    infix fun x(other: Vector) = cross(other)
-    /**The angle between vectors.*/
-    infix fun v(other: Vector) = angleTo(other)
     /**
      * Such vector that is a result of this vector bouncing of a wall with a normal of [other].
      * @param other must be normalized.

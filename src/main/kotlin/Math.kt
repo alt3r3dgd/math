@@ -19,16 +19,22 @@ fun matrixOf(vararg rows: List<Double>) = Matrix(rows.toList())
 fun Matrix(height: Int, width: Int) = Matrix(List(height) { List(width) { 0.0 } })
 
 /**
- * Creates a matrix based on the [func].
+ * Creates a matrix based on the [builderAction].
  *
  * The way it works is you tell it the desired [width] of the matrix
  * and can add as many numbers as you want with the `append(num: Number)`
  * function while the builder automatically shifts rows for you.
  */
-inline fun buildMatrix(width: Int, func: MatrixBuilder.() -> Unit) = MatrixBuilder(width).apply(func).toMatrix()
+inline fun buildMatrix(width: Int, builderAction: MatrixBuilder.() -> Unit) =
+    MatrixBuilder(width).apply(builderAction).toMatrix()
 
 inline fun Matrix(height: Int, width: Int, formula: (Int, Int) -> Number) =
     Matrix(List(height) { j -> List(width) { i -> formula(i, j).toDouble() } })
 
 fun Double.revDiv(other: Double) = other / this
 fun Double.revRem(other: Double) = other % this
+
+fun main() {
+    val a = 0.0..1.0
+    println(a)
+}
