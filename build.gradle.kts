@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "me.altered"
-version = "1.0-SNAPSHOT"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -13,8 +13,6 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    val coroutinesVersion = "1.5.1"
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 }
 
 tasks.test {
