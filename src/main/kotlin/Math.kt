@@ -29,7 +29,7 @@ inline fun buildMatrix(width: Int, builderAction: MatrixBuilder.() -> Unit) =
     MatrixBuilder(width).apply(builderAction).toMatrix()
 
 inline fun Matrix(height: Int, width: Int, formula: (Int, Int) -> Number) =
-    Matrix(List(height) { j -> List(width) { i -> formula(i, j).toDouble() } })
+    Matrix(List(height) { i -> List(width) { j -> formula(i, j).toDouble() } })
 
 fun Double.revDiv(other: Double) = other / this
 fun Double.revRem(other: Double) = other % this

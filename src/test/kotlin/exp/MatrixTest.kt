@@ -1,5 +1,6 @@
 package exp
 
+import me.altered.math.Matrix
 import me.altered.math.matrixOf
 import me.altered.math.rowOf
 import org.junit.Test
@@ -9,10 +10,13 @@ internal class MatrixTest {
     fun build() {
         val m = matrixOf(
             rowOf(1, 2, 3),
-            rowOf(4, 5, 6),
-            rowOf(7, 8, 9)
+            rowOf(4, 5, 6)
         )
 
-        println(m.getComplement(1, 1))
+        val x = Matrix(2, 3) { i, j -> j + i * 3 + 1 }
+
+        println(m)
+        println(m.transposed)
+        println(x)
     }
 }
