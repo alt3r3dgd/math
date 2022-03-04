@@ -31,10 +31,6 @@ class Vector(var x: Double = 0.0, var y: Double = 0.0, var z: Double = 0.0) {
     operator fun div(num: Number) = map(num.toDouble()::revDiv)
     operator fun rem(num: Number) = map(num.toDouble()::revRem)
 
-    operator fun Number.times(p: Vector) = p.map(toDouble()::times)
-    operator fun Number.div(p: Vector) = p.map(toDouble()::revDiv)
-    operator fun Number.rem(p: Vector) = p.map(toDouble()::revRem)
-
     /**The dot product of vectors.*/
     operator fun times(other: Vector) = dot(other)
 
@@ -99,5 +95,9 @@ class Vector(var x: Double = 0.0, var y: Double = 0.0, var z: Double = 0.0) {
         val back get() = Vector(0.0, 0.0, -1.0)
         @JvmStatic
         val infinity get() = Vector(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
+
+        operator fun Number.times(p: Vector) = p.map(toDouble()::times)
+        operator fun Number.div(p: Vector) = p.map(toDouble()::revDiv)
+        operator fun Number.rem(p: Vector) = p.map(toDouble()::revRem)
     }
 }
